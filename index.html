@@ -195,30 +195,26 @@
         }
 
         function speak() {
-    // 1. 停止目前所有發聲，避免卡住
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // 先停止之前的發音
 
     const text = words[currentIndex].jp;
     const utterance = new SpeechSynthesisUtterance(text);
     
-    // 2. 指定語系
+    // 取得系統支援的所有語音清單
+    const voices = window.speechSynthesis.getVoices();
+    // 優先找日文人聲，如果找不到就用預設的 ja-JP
+    const jpVoice = voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP');
+    if (jpVoice) utterance.voice = jpVoice;
+
     utterance.lang = 'ja-JP';
     utterance.rate = currentSpeed;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    // 3. 針對某些瀏覽器 Bug 的處理
-    utterance.onend = function (event) {
-        console.log('播放結束');
-    };
-
-    utterance.onerror = function (event) {
-        console.error('語音播放出錯：', event);
-    };
-
-    // 4. 執行朗讀
+    
     window.speechSynthesis.speak(utterance);
 }
+
+// 針對手機端：頁面載入時先預熱語音引擎
+window.speechSynthesis.getVoices();is.speak(utterance);
+
 
         // 監聽鍵盤左右鍵切換
         document.addEventListener('keydown', (e) => {
