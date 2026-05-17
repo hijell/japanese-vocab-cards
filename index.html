@@ -195,13 +195,30 @@
         }
 
         function speak() {
-            const text = words[currentIndex].jp;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ja-JP';
-            utterance.rate = currentSpeed;
-            window.speechSynthesis.cancel(); // 停止目前的播放
-            window.speechSynthesis.speak(utterance);
-        }
+    // 1. 停止目前所有發聲，避免卡住
+    window.speechSynthesis.cancel();
+
+    const text = words[currentIndex].jp;
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // 2. 指定語系
+    utterance.lang = 'ja-JP';
+    utterance.rate = currentSpeed;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    // 3. 針對某些瀏覽器 Bug 的處理
+    utterance.onend = function (event) {
+        console.log('播放結束');
+    };
+
+    utterance.onerror = function (event) {
+        console.error('語音播放出錯：', event);
+    };
+
+    // 4. 執行朗讀
+    window.speechSynthesis.speak(utterance);
+}
 
         // 監聽鍵盤左右鍵切換
         document.addEventListener('keydown', (e) => {
